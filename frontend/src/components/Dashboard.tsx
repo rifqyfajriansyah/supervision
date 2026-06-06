@@ -25,8 +25,8 @@ const Dashboard = () => {
           </h1>
         </div>
         <div className="flex items-center gap-4">
-          <select 
-            value={selectedProjectId} 
+          <select
+            value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
             className="bg-gray-800 border border-gray-600 rounded-lg p-2 focus:ring-2 focus:ring-primary focus:outline-none"
           >
@@ -37,15 +37,16 @@ const Dashboard = () => {
         </div>
       </header>
 
+
       {/* Main Grid */}
       <div className="grid grid-cols-3 gap-6 flex-1 min-h-0">
-        
+
         {/* Left Column: KPI & Map */}
         <div className="col-span-1 flex flex-col gap-6">
           <div className="bg-surface rounded-xl p-4 shadow-lg border border-gray-700 flex flex-col justify-center items-center">
-             <h2 className="text-lg font-semibold text-gray-400 mb-2">Overall Progress</h2>
-             <div className="text-5xl font-bold text-perform">72%</div>
-             <p className="text-sm text-gray-500 mt-2">+4.5% vs last week</p>
+            <h2 className="text-lg font-semibold text-gray-400 mb-2">Overall Progress</h2>
+            <div className="text-5xl font-bold text-perform">72%</div>
+            <p className="text-sm text-gray-500 mt-2">+4.5% vs last week</p>
           </div>
           <div className="flex-1 bg-surface rounded-xl p-4 shadow-lg border border-gray-700 overflow-hidden flex flex-col">
             <h2 className="text-lg font-semibold text-gray-300 mb-4">Project Map</h2>
