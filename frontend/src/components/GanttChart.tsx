@@ -4,6 +4,7 @@ import type { Task as GanttTask } from 'gantt-task-react';
 import 'gantt-task-react/dist/index.css';
 import { fetchProjectSchedule, addTask } from '../services/api';
 import type { Task } from '../services/api';
+import { Plus, X } from 'lucide-react';
 
 interface Props {
   projectId: string;
@@ -13,7 +14,8 @@ const GanttChart = ({ projectId }: Props) => {
   const [tasks, setTasks] = useState<GanttTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Form states
+  // Modal & Form states
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTaskName, setNewTaskName] = useState('');
   const [newTaskStart, setNewTaskStart] = useState('');
   const [newTaskEnd, setNewTaskEnd] = useState('');
@@ -63,6 +65,7 @@ const GanttChart = ({ projectId }: Props) => {
       setNewTaskName('');
       setNewTaskStart('');
       setNewTaskEnd('');
+      setIsModalOpen(false);
       // Reload schedule
       loadSchedule();
     } catch (err) {
@@ -76,35 +79,16 @@ const GanttChart = ({ projectId }: Props) => {
   if (isLoading) return <div className="text-gray-400 flex justify-center items-center h-full">Loading Schedule...</div>;
 
   return (
-    <div className="bg-white rounded p-4 text-black h-full flex flex-col">
-      <form onSubmit={handleAddTask} className="flex gap-2 mb-4">
-        <input 
-          type="text" 
-          placeholder="Task Name" 
-          className="border border-gray-300 rounded px-2 py-1 flex-1 text-sm"
-          value={newTaskName}
-          onChange={(e) => setNewTaskName(e.target.value)}
-        />
-        <input 
-          type="date" 
-          className="border border-gray-300 rounded px-2 py-1 text-sm"
-          value={newTaskStart}
-          onChange={(e) => setNewTaskStart(e.target.value)}
-        />
-        <input 
-          type="date" 
-          className="border border-gray-300 rounded px-2 py-1 text-sm"
-          value={newTaskEnd}
-          onChange={(e) => setNewTaskEnd(e.target.value)}
-        />
+    <div className="bg-white rounded p-4 text-black h-full flex flex-col relative">
+      <div className="flex justify-end mb-2">
         <button 
-          type="submit" 
-          disabled={isAdding}
-          className="bg-blue-600 text-white px-4 py-1 rounded text-sm hover:bg-blue-700 disabled:opacity-50"
+          onClick={() => setIsModalOpen(true)}
+          className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 flex items-center gap-2"
         >
-          {isAdding ? 'Adding...' : 'Add Task'}
+          <Plus size={16} />
+          Add Task
         </button>
-      </form>
+      </div>
       
       <div className="flex-1 overflow-auto">
         {tasks.length === 0 ? (
@@ -113,6 +97,69 @@ const GanttChart = ({ projectId }: Props) => {
            <Gantt tasks={tasks} viewMode={ViewMode.Day} />
         )}
       </div>
+
+      {/* Add Task Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
+          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-96 shadow-2xl text-white">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold">Add New Task</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white">
+                 <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddTask} className="flex flex-col gap-4">
+               <div>
+                 <label className="block text-sm text-gray-400 mb-1">Task Name</label>
+                 <input 
+                   type="text" 
+                   className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                   value={newTaskName}
+                   onChange={(e) => setNewTaskName(e.target.value)}
+                   required
+                 />
+               </div>
+               <div>
+                 <label className="block text-sm text-gray-400 mb-1">Start Date</label>
+                 <input 
+                   type="date" 
+                   className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500 [color-scheme:dark]"
+                   value={newTaskStart}
+                   onChange={(e) => setNewTaskStart(e.target.value)}
+                   required
+                 />
+               </div>
+               <div>
+                 <label className="block text-sm text-gray-400 mb-1">End Date</label>
+                 <input 
+                   type="date" 
+                   className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500 [color-scheme:dark]"
+                   value={newTaskEnd}
+                   onChange={(e) => setNewTaskEnd(e.target.value)}
+                   required
+                 />
+               </div>
+               <div className="flex justify-end gap-3 mt-4">
+                 <button 
+                   type="button" 
+                   onClick={() => setIsModalOpen(false)}
+                   className="px-4 py-2 text-gray-400 hover:text-white"
+                 >
+                   Cancel
+                 </button>
+                 <button 
+                   type="submit" 
+                   disabled={isAdding}
+                   className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                 >
+                   {isAdding ? 'Adding...' : 'Save Task'}
+                 </button>
+               </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
