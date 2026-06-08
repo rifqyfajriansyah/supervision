@@ -21,6 +21,7 @@ const GanttChart = ({ projectId }: Props) => {
   const [newTaskEnd, setNewTaskEnd] = useState('');
   const [newTaskDependencies, setNewTaskDependencies] = useState<string[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Day);
 
   const loadSchedule = () => {
     setIsLoading(true);
@@ -82,7 +83,19 @@ const GanttChart = ({ projectId }: Props) => {
 
   return (
     <div className="bg-white rounded p-4 text-black h-full flex flex-col relative">
-      <div className="flex justify-end mb-2">
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-semibold text-gray-700">View:</label>
+          <select 
+            value={viewMode} 
+            onChange={(e) => setViewMode(e.target.value as ViewMode)}
+            className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
+          >
+            <option value={ViewMode.Day}>Day</option>
+            <option value={ViewMode.Week}>Week</option>
+            <option value={ViewMode.Month}>Month</option>
+          </select>
+        </div>
         <button 
           onClick={() => setIsModalOpen(true)}
           className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 flex items-center gap-2"
@@ -96,7 +109,7 @@ const GanttChart = ({ projectId }: Props) => {
         {tasks.length === 0 ? (
            <div className="text-gray-500 flex justify-center items-center h-full">No tasks available for this project.</div>
         ) : (
-           <Gantt tasks={tasks} viewMode={ViewMode.Day} />
+           <Gantt tasks={tasks} viewMode={viewMode} />
         )}
       </div>
 
