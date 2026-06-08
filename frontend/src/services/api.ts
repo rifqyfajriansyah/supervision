@@ -48,3 +48,13 @@ export const addTask = async (projectId: string, taskData: Omit<Task, 'id'>): Pr
   if (!res.ok) throw new Error('Failed to add task');
   return res.json();
 };
+
+export const editTask = async (projectId: string, taskId: string, taskData: Partial<Omit<Task, 'id'>>): Promise<Task> => {
+  const res = await fetch(`${API_BASE_URL}/projects/${projectId}/schedule/${taskId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(taskData)
+  });
+  if (!res.ok) throw new Error('Failed to edit task');
+  return res.json();
+};

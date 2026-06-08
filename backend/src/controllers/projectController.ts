@@ -38,3 +38,18 @@ export const addTaskToSchedule = (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to add task' });
   }
 };
+
+export const editTaskInSchedule = (req: Request, res: Response) => {
+  const { id, taskId } = req.params;
+  const taskData = req.body;
+  try {
+    const updatedTask = projectService.editTask(id, taskId, taskData);
+    if (updatedTask) {
+      res.json(updatedTask);
+    } else {
+      res.status(404).json({ error: 'Task not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to edit task' });
+  }
+};

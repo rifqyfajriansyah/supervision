@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Gantt, ViewMode } from 'gantt-task-react';
 import type { Task as GanttTask } from 'gantt-task-react';
 import 'gantt-task-react/dist/index.css';
-import { fetchProjectSchedule, addTask } from '../services/api';
+import { fetchProjectSchedule, addTask, editTask } from '../services/api';
 import type { Task } from '../services/api';
 import { Plus, X } from 'lucide-react';
 
@@ -16,6 +16,7 @@ const GanttChart = ({ projectId }: Props) => {
   
   // Modal & Form states
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [newTaskName, setNewTaskName] = useState('');
   const [newTaskStart, setNewTaskStart] = useState('');
   const [newTaskEnd, setNewTaskEnd] = useState('');
@@ -34,7 +35,7 @@ const GanttChart = ({ projectId }: Props) => {
           id: t.id,
           progress: t.progress,
           type: 'task',
-          dependencies: t.dependencies,
+          dependencies: t.dependencies || [],
           styles: { progressColor: '#3B82F6', progressSelectedColor: '#2563EB' }
         }));
         setTasks(formattedTasks);
@@ -51,31 +52,65 @@ const GanttChart = ({ projectId }: Props) => {
     loadSchedule();
   }, [projectId]);
 
-  const handleAddTask = async (e: React.FormEvent) => {
+  const handleSaveTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskName || !newTaskStart || !newTaskEnd) return;
     setIsAdding(true);
     try {
-      await addTask(projectId, {
-        name: newTaskName,
-        start: newTaskStart,
-        end: newTaskEnd,
-        progress: 0,
-        dependencies: newTaskDependencies
-      });
-      // Reset form
-      setNewTaskName('');
-      setNewTaskStart('');
-      setNewTaskEnd('');
-      setNewTaskDependencies([]);
+      if (editingTaskId) {
+        await editTask(projectId, editingTaskId, {
+          name: newTaskName,
+          start: newTaskStart,
+          end: newTaskEnd,
+          dependencies: newTaskDependencies
+        });
+      } else {
+        await addTask(projectId, {
+          name: newTaskName,
+          start: newTaskStart,
+          end: newTaskEnd,
+          progress: 0,
+          dependencies: newTaskDependencies
+        });
+      }
       setIsModalOpen(false);
-      // Reload schedule
       loadSchedule();
     } catch (err) {
       console.error(err);
-      alert('Failed to add task');
+      alert('Failed to save task');
     } finally {
       setIsAdding(false);
+    }
+  };
+
+  const openAddModal = () => {
+    setEditingTaskId(null);
+    setNewTaskName('');
+    setNewTaskStart('');
+    setNewTaskEnd('');
+    setNewTaskDependencies([]);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (task: GanttTask) => {
+    setEditingTaskId(task.id);
+    setNewTaskName(task.name);
+    // Convert date back to YYYY-MM-DD
+    setNewTaskStart(task.start.toISOString().split('T')[0]);
+    setNewTaskEnd(task.end.toISOString().split('T')[0]);
+    setNewTaskDependencies(task.dependencies || []);
+    setIsModalOpen(true);
+  };
+
+  const handleDateChange = async (task: GanttTask) => {
+    setTasks(tasks.map(t => (t.id === task.id ? task : t)));
+    try {
+      await editTask(projectId, task.id, {
+        start: task.start.toISOString().split('T')[0],
+        end: task.end.toISOString().split('T')[0]
+      });
+    } catch(err) {
+      console.error(err);
     }
   };
 
@@ -97,7 +132,7 @@ const GanttChart = ({ projectId }: Props) => {
           </select>
         </div>
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={openAddModal}
           className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 flex items-center gap-2"
         >
           <Plus size={16} />
@@ -112,10 +147,8 @@ const GanttChart = ({ projectId }: Props) => {
            <Gantt 
              tasks={tasks} 
              viewMode={viewMode} 
-             onDateChange={(task: GanttTask) => {
-               setTasks(tasks.map(t => (t.id === task.id ? task : t)));
-               // Di sini nantinya bisa panggil API backend buat update tanggalnya
-             }}
+             onDoubleClick={openEditModal}
+             onDateChange={handleDateChange}
              onProgressChange={(task: GanttTask) => {
                setTasks(tasks.map(t => (t.id === task.id ? task : t)));
              }}
@@ -123,18 +156,18 @@ const GanttChart = ({ projectId }: Props) => {
         )}
       </div>
 
-      {/* Add Task Modal */}
+      {/* Task Manager Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
           <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-96 shadow-2xl text-white">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">Add New Task</h3>
+              <h3 className="text-xl font-bold">{editingTaskId ? 'Edit Task Details' : 'Add New Task'}</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white">
                  <X size={20} />
               </button>
             </div>
             
-            <form onSubmit={handleAddTask} className="flex flex-col gap-4">
+            <form onSubmit={handleSaveTask} className="flex flex-col gap-4">
                <div>
                  <label className="block text-sm text-gray-400 mb-1">Task Name</label>
                  <input 
@@ -168,10 +201,10 @@ const GanttChart = ({ projectId }: Props) => {
                <div>
                  <label className="block text-sm text-gray-400 mb-1">Dependencies (Pilih Task Sebelumnya)</label>
                  <div className="max-h-32 overflow-y-auto bg-gray-800 border border-gray-600 rounded p-2">
-                   {tasks.length === 0 ? (
-                     <div className="text-gray-500 text-sm italic">Belum ada task yang bisa dipilih</div>
+                   {tasks.filter(t => t.id !== editingTaskId).length === 0 ? (
+                     <div className="text-gray-500 text-sm italic">Belum ada task lain yang bisa dipilih</div>
                    ) : (
-                     tasks.map(task => (
+                     tasks.filter(t => t.id !== editingTaskId).map(task => (
                        <label key={task.id} className="flex items-center gap-2 text-sm text-gray-300 py-1 cursor-pointer">
                          <input 
                            type="checkbox"
@@ -204,7 +237,7 @@ const GanttChart = ({ projectId }: Props) => {
                    disabled={isAdding}
                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                  >
-                   {isAdding ? 'Adding...' : 'Save Task'}
+                   {isAdding ? 'Saving...' : 'Save Task'}
                  </button>
                </div>
             </form>

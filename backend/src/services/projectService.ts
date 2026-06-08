@@ -24,4 +24,18 @@ export class ProjectService {
     projectSchedules[projectId].push(newTask);
     return newTask;
   }
+
+  public editTask(projectId: string, taskId: string, taskData: Partial<Omit<Task, 'id'>>): Task | null {
+    if (!projectSchedules[projectId]) return null;
+    
+    const taskIndex = projectSchedules[projectId].findIndex(t => t.id === taskId);
+    if (taskIndex === -1) return null;
+
+    const updatedTask = {
+      ...projectSchedules[projectId][taskIndex],
+      ...taskData
+    };
+    projectSchedules[projectId][taskIndex] = updatedTask;
+    return updatedTask;
+  }
 }
