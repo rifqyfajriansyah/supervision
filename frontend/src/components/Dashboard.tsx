@@ -4,11 +4,14 @@ import type { Project } from '../services/api';
 import MapComponent from './MapComponent';
 import SCurveChart from './SCurveChart';
 import GanttChart from './GanttChart';
-import { Activity } from 'lucide-react';
+import { Activity, Maximize2, X } from 'lucide-react';
+
+type ViewType = 'map' | 'scurve' | 'gantt' | null;
 
 const Dashboard = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('7');
+  const [expandedView, setExpandedView] = useState<ViewType>(null);
 
   useEffect(() => {
     fetchProjects().then(data => setProjects(data)).catch(console.error);
@@ -49,7 +52,12 @@ const Dashboard = () => {
             <p className="text-sm text-gray-500 mt-2">+4.5% vs last week</p>
           </div>
           <div className="flex-1 bg-surface rounded-xl p-4 shadow-lg border border-gray-700 overflow-hidden flex flex-col">
-            <h2 className="text-lg font-semibold text-gray-300 mb-4">Project Map</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-300">Project Map</h2>
+              <button onClick={() => setExpandedView('map')} className="text-gray-400 hover:text-white" title="Expand Map">
+                <Maximize2 size={18} />
+              </button>
+            </div>
             <div className="flex-1 rounded-lg overflow-hidden border border-gray-600 relative">
               <MapComponent projects={projects} selectedId={selectedProjectId} />
             </div>
@@ -59,19 +67,52 @@ const Dashboard = () => {
         {/* Right Column: S-Curve & Gantt */}
         <div className="col-span-2 flex flex-col gap-6">
           <div className="h-1/2 bg-surface rounded-xl p-4 shadow-lg border border-gray-700 flex flex-col">
-            <h2 className="text-lg font-semibold text-gray-300 mb-4">Progress Comparison (S-Curve)</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-300">Progress Comparison (S-Curve)</h2>
+              <button onClick={() => setExpandedView('scurve')} className="text-gray-400 hover:text-white" title="Expand S-Curve">
+                <Maximize2 size={18} />
+              </button>
+            </div>
             <div className="flex-1 min-h-0">
               <SCurveChart projectId={selectedProjectId} />
             </div>
           </div>
           <div className="h-1/2 bg-surface rounded-xl p-4 shadow-lg border border-gray-700 flex flex-col">
-            <h2 className="text-lg font-semibold text-gray-300 mb-4">Project Schedule</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-300">Project Schedule</h2>
+              <button onClick={() => setExpandedView('gantt')} className="text-gray-400 hover:text-white" title="Expand Gantt Chart">
+                <Maximize2 size={18} />
+              </button>
+            </div>
             <div className="flex-1 min-h-0 overflow-y-auto">
               <GanttChart projectId={selectedProjectId} />
             </div>
           </div>
         </div>
       </div>
+
+      {/* Expanded View Modal */}
+      {expandedView && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center p-8">
+          <div className="bg-surface border border-gray-700 rounded-xl shadow-2xl flex flex-col w-full h-full max-w-7xl max-h-[90vh]">
+            <div className="flex justify-between items-center p-4 border-b border-gray-700">
+              <h2 className="text-xl font-bold text-white">
+                {expandedView === 'map' && 'Project Map (Detailed View)'}
+                {expandedView === 'scurve' && 'Progress Comparison (S-Curve) (Detailed View)'}
+                {expandedView === 'gantt' && 'Project Schedule (Detailed View)'}
+              </h2>
+              <button onClick={() => setExpandedView(null)} className="text-gray-400 hover:text-white">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden p-6 relative">
+               {expandedView === 'map' && <MapComponent projects={projects} selectedId={selectedProjectId} />}
+               {expandedView === 'scurve' && <SCurveChart projectId={selectedProjectId} />}
+               {expandedView === 'gantt' && <GanttChart projectId={selectedProjectId} />}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
