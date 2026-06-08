@@ -109,7 +109,17 @@ const GanttChart = ({ projectId }: Props) => {
         {tasks.length === 0 ? (
            <div className="text-gray-500 flex justify-center items-center h-full">No tasks available for this project.</div>
         ) : (
-           <Gantt tasks={tasks} viewMode={viewMode} />
+           <Gantt 
+             tasks={tasks} 
+             viewMode={viewMode} 
+             onDateChange={(task: GanttTask) => {
+               setTasks(tasks.map(t => (t.id === task.id ? task : t)));
+               // Di sini nantinya bisa panggil API backend buat update tanggalnya
+             }}
+             onProgressChange={(task: GanttTask) => {
+               setTasks(tasks.map(t => (t.id === task.id ? task : t)));
+             }}
+           />
         )}
       </div>
 
