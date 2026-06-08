@@ -19,6 +19,7 @@ const GanttChart = ({ projectId }: Props) => {
   const [newTaskName, setNewTaskName] = useState('');
   const [newTaskStart, setNewTaskStart] = useState('');
   const [newTaskEnd, setNewTaskEnd] = useState('');
+  const [newTaskDependencies, setNewTaskDependencies] = useState<string[]>([]);
   const [isAdding, setIsAdding] = useState(false);
 
   const loadSchedule = () => {
@@ -59,12 +60,13 @@ const GanttChart = ({ projectId }: Props) => {
         start: newTaskStart,
         end: newTaskEnd,
         progress: 0,
-        dependencies: []
+        dependencies: newTaskDependencies
       });
       // Reset form
       setNewTaskName('');
       setNewTaskStart('');
       setNewTaskEnd('');
+      setNewTaskDependencies([]);
       setIsModalOpen(false);
       // Reload schedule
       loadSchedule();
@@ -139,6 +141,32 @@ const GanttChart = ({ projectId }: Props) => {
                    onChange={(e) => setNewTaskEnd(e.target.value)}
                    required
                  />
+               </div>
+               <div>
+                 <label className="block text-sm text-gray-400 mb-1">Dependencies (Pilih Task Sebelumnya)</label>
+                 <div className="max-h-32 overflow-y-auto bg-gray-800 border border-gray-600 rounded p-2">
+                   {tasks.length === 0 ? (
+                     <div className="text-gray-500 text-sm italic">Belum ada task yang bisa dipilih</div>
+                   ) : (
+                     tasks.map(task => (
+                       <label key={task.id} className="flex items-center gap-2 text-sm text-gray-300 py-1 cursor-pointer">
+                         <input 
+                           type="checkbox"
+                           className="accent-blue-500 w-4 h-4"
+                           checked={newTaskDependencies.includes(task.id)}
+                           onChange={(e) => {
+                             if (e.target.checked) {
+                               setNewTaskDependencies([...newTaskDependencies, task.id]);
+                             } else {
+                               setNewTaskDependencies(newTaskDependencies.filter(id => id !== task.id));
+                             }
+                           }}
+                         />
+                         {task.name}
+                       </label>
+                     ))
+                   )}
+                 </div>
                </div>
                <div className="flex justify-end gap-3 mt-4">
                  <button 
