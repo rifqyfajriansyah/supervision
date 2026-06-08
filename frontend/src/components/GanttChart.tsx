@@ -73,7 +73,13 @@ const GanttChart = ({ projectId }: Props) => {
           dependencies: newTaskDependencies
         });
       }
-      setIsModalOpen(false);
+      
+      // Reset form instead of closing modal so they can keep adding
+      setEditingTaskId(null);
+      setNewTaskName('');
+      setNewTaskStart('');
+      setNewTaskEnd('');
+      setNewTaskDependencies([]);
       loadSchedule();
     } catch (err) {
       console.error(err);
@@ -99,7 +105,6 @@ const GanttChart = ({ projectId }: Props) => {
     setNewTaskStart(task.start.toISOString().split('T')[0]);
     setNewTaskEnd(task.end.toISOString().split('T')[0]);
     setNewTaskDependencies(task.dependencies || []);
-    setIsModalOpen(true);
   };
 
   const handleDateChange = async (task: GanttTask) => {
@@ -112,6 +117,14 @@ const GanttChart = ({ projectId }: Props) => {
     } catch(err) {
       console.error(err);
     }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTaskId(null);
+    setNewTaskName('');
+    setNewTaskStart('');
+    setNewTaskEnd('');
+    setNewTaskDependencies([]);
   };
 
   if (isLoading) return <div className="text-gray-400 flex justify-center items-center h-full">Loading Schedule...</div>;
@@ -136,7 +149,7 @@ const GanttChart = ({ projectId }: Props) => {
           className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 flex items-center gap-2"
         >
           <Plus size={16} />
-          Add Task
+          Task Manager
         </button>
       </div>
       
@@ -147,7 +160,10 @@ const GanttChart = ({ projectId }: Props) => {
            <Gantt 
              tasks={tasks} 
              viewMode={viewMode} 
-             onDoubleClick={openEditModal}
+             onDoubleClick={(task) => {
+               openEditModal(task);
+               setIsModalOpen(true);
+             }}
              onDateChange={handleDateChange}
              onProgressChange={(task: GanttTask) => {
                setTasks(tasks.map(t => (t.id === task.id ? task : t)));
@@ -158,89 +174,143 @@ const GanttChart = ({ projectId }: Props) => {
 
       {/* Task Manager Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
-          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-96 shadow-2xl text-white">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">{editingTaskId ? 'Edit Task Details' : 'Add New Task'}</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-[900px] shadow-2xl text-white max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-2xl font-bold">Task Manager</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white">
-                 <X size={20} />
+                 <X size={24} />
               </button>
             </div>
             
-            <form onSubmit={handleSaveTask} className="flex flex-col gap-4">
-               <div>
-                 <label className="block text-sm text-gray-400 mb-1">Task Name</label>
-                 <input 
-                   type="text" 
-                   className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-                   value={newTaskName}
-                   onChange={(e) => setNewTaskName(e.target.value)}
-                   required
-                 />
-               </div>
-               <div>
-                 <label className="block text-sm text-gray-400 mb-1">Start Date</label>
-                 <input 
-                   type="date" 
-                   className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500 [color-scheme:dark]"
-                   value={newTaskStart}
-                   onChange={(e) => setNewTaskStart(e.target.value)}
-                   required
-                 />
-               </div>
-               <div>
-                 <label className="block text-sm text-gray-400 mb-1">End Date</label>
-                 <input 
-                   type="date" 
-                   className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500 [color-scheme:dark]"
-                   value={newTaskEnd}
-                   onChange={(e) => setNewTaskEnd(e.target.value)}
-                   required
-                 />
-               </div>
-               <div>
-                 <label className="block text-sm text-gray-400 mb-1">Dependencies (Pilih Task Sebelumnya)</label>
-                 <div className="max-h-32 overflow-y-auto bg-gray-800 border border-gray-600 rounded p-2">
-                   {tasks.filter(t => t.id !== editingTaskId).length === 0 ? (
-                     <div className="text-gray-500 text-sm italic">Belum ada task lain yang bisa dipilih</div>
-                   ) : (
-                     tasks.filter(t => t.id !== editingTaskId).map(task => (
-                       <label key={task.id} className="flex items-center gap-2 text-sm text-gray-300 py-1 cursor-pointer">
-                         <input 
-                           type="checkbox"
-                           className="accent-blue-500 w-4 h-4"
-                           checked={newTaskDependencies.includes(task.id)}
-                           onChange={(e) => {
-                             if (e.target.checked) {
-                               setNewTaskDependencies([...newTaskDependencies, task.id]);
-                             } else {
-                               setNewTaskDependencies(newTaskDependencies.filter(id => id !== task.id));
-                             }
-                           }}
-                         />
-                         {task.name}
-                       </label>
-                     ))
-                   )}
+            {/* Existing Tasks Table */}
+            <div className="mb-6 flex-1 overflow-y-auto border border-gray-700 rounded-lg">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-800 text-gray-300 sticky top-0">
+                  <tr>
+                    <th className="px-4 py-3">Task Name</th>
+                    <th className="px-4 py-3">Start Date</th>
+                    <th className="px-4 py-3">End Date</th>
+                    <th className="px-4 py-3">Dependencies</th>
+                    <th className="px-4 py-3 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tasks.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-6 text-center text-gray-500 italic">No existing tasks yet.</td>
+                    </tr>
+                  )}
+                  {tasks.map(t => (
+                    <tr key={t.id} className="border-t border-gray-700 hover:bg-gray-800 transition-colors">
+                      <td className="px-4 py-3 font-medium">{t.name}</td>
+                      <td className="px-4 py-3 text-gray-400">{t.start.toISOString().split('T')[0]}</td>
+                      <td className="px-4 py-3 text-gray-400">{t.end.toISOString().split('T')[0]}</td>
+                      <td className="px-4 py-3 text-gray-400">
+                        {t.dependencies && t.dependencies.length > 0 
+                          ? tasks.filter(task => t.dependencies?.includes(task.id)).map(task => task.name).join(', ')
+                          : '-'}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <button 
+                          onClick={() => openEditModal(t)}
+                          className="text-blue-400 hover:text-blue-300 font-semibold"
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Form */}
+            <div className="border-t border-gray-700 pt-6">
+              <h4 className="font-semibold mb-4 text-lg text-blue-400">
+                {editingTaskId ? '✏️ Edit Task Details' : '➕ Add New Task'}
+              </h4>
+              <form onSubmit={handleSaveTask} className="grid grid-cols-2 gap-4">
+                 <div className="col-span-2 sm:col-span-1">
+                   <label className="block text-sm text-gray-400 mb-1">Task Name</label>
+                   <input 
+                     type="text" 
+                     className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                     value={newTaskName}
+                     onChange={(e) => setNewTaskName(e.target.value)}
+                     required
+                   />
                  </div>
-               </div>
-               <div className="flex justify-end gap-3 mt-4">
-                 <button 
-                   type="button" 
-                   onClick={() => setIsModalOpen(false)}
-                   className="px-4 py-2 text-gray-400 hover:text-white"
-                 >
-                   Cancel
-                 </button>
-                 <button 
-                   type="submit" 
-                   disabled={isAdding}
-                   className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-                 >
-                   {isAdding ? 'Saving...' : 'Save Task'}
-                 </button>
-               </div>
-            </form>
+                 
+                 <div className="col-span-2 sm:col-span-1 row-span-3">
+                   <label className="block text-sm text-gray-400 mb-1">Dependencies (Pilih Task Sebelumnya)</label>
+                   <div className="h-40 overflow-y-auto bg-gray-800 border border-gray-600 rounded p-2">
+                     {tasks.filter(t => t.id !== editingTaskId).length === 0 ? (
+                       <div className="text-gray-500 text-sm italic p-2">Belum ada task lain yang bisa dipilih</div>
+                     ) : (
+                       tasks.filter(t => t.id !== editingTaskId).map(task => (
+                         <label key={task.id} className="flex items-center gap-2 text-sm text-gray-300 py-1.5 px-2 hover:bg-gray-700 rounded cursor-pointer transition-colors">
+                           <input 
+                             type="checkbox"
+                             className="accent-blue-500 w-4 h-4"
+                             checked={newTaskDependencies.includes(task.id)}
+                             onChange={(e) => {
+                               if (e.target.checked) {
+                                 setNewTaskDependencies([...newTaskDependencies, task.id]);
+                               } else {
+                                 setNewTaskDependencies(newTaskDependencies.filter(id => id !== task.id));
+                               }
+                             }}
+                           />
+                           {task.name}
+                         </label>
+                       ))
+                     )}
+                   </div>
+                 </div>
+
+                 <div className="col-span-2 sm:col-span-1">
+                   <label className="block text-sm text-gray-400 mb-1">Start Date</label>
+                   <input 
+                     type="date" 
+                     className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500 [color-scheme:dark]"
+                     value={newTaskStart}
+                     onChange={(e) => setNewTaskStart(e.target.value)}
+                     required
+                   />
+                 </div>
+
+                 <div className="col-span-2 sm:col-span-1">
+                   <label className="block text-sm text-gray-400 mb-1">End Date</label>
+                   <input 
+                     type="date" 
+                     className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500 [color-scheme:dark]"
+                     value={newTaskEnd}
+                     onChange={(e) => setNewTaskEnd(e.target.value)}
+                     required
+                   />
+                 </div>
+
+                 <div className="col-span-2 flex justify-end gap-3 mt-2">
+                   {editingTaskId && (
+                     <button 
+                       type="button" 
+                       onClick={handleCancelEdit}
+                       className="px-4 py-2 text-gray-400 hover:text-white"
+                     >
+                       Cancel Edit
+                     </button>
+                   )}
+                   <button 
+                     type="submit" 
+                     disabled={isAdding}
+                     className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                   >
+                     {isAdding ? 'Saving...' : (editingTaskId ? 'Save Changes' : 'Add Task')}
+                   </button>
+                 </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
