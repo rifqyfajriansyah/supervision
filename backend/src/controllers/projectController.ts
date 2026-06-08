@@ -27,3 +27,14 @@ export const getProjectSCurve = (req: Request, res: Response) => {
     res.status(404).json({ error: 'S-Curve not found' });
   }
 };
+
+export const addTaskToSchedule = (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const taskData = req.body;
+  try {
+    const newTask = projectService.addTask(id, taskData);
+    res.status(201).json(newTask);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add task' });
+  }
+};

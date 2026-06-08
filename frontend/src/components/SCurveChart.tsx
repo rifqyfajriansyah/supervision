@@ -28,17 +28,24 @@ interface Props {
 
 const SCurveChart = ({ projectId }: Props) => {
   const [data, setData] = useState<{ planned: number[], actual: number[] } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     fetchProjectSCurve(projectId)
-      .then(setData)
+      .then((res) => {
+         setData(res);
+         setIsLoading(false);
+      })
       .catch((err) => {
          console.error(err);
          setData(null);
+         setIsLoading(false);
       });
   }, [projectId]);
 
-  if (!data) return <div className="text-gray-400 flex justify-center items-center h-full">Loading S-Curve...</div>;
+  if (isLoading) return <div className="text-gray-400 flex justify-center items-center h-full">Loading S-Curve...</div>;
+  if (!data) return <div className="text-gray-400 flex justify-center items-center h-full">No data available for this project.</div>;
 
   const labels = Array.from({ length: Math.max(data.planned.length, data.actual.length) }, (_, i) => `Month ${i + 1}`);
 

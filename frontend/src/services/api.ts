@@ -38,3 +38,13 @@ export const fetchProjectSCurve = async (id: string): Promise<{ planned: number[
   if (!res.ok) throw new Error('Failed to fetch S-curve');
   return res.json();
 };
+
+export const addTask = async (projectId: string, taskData: Omit<Task, 'id'>): Promise<Task> => {
+  const res = await fetch(`${API_BASE_URL}/projects/${projectId}/schedule`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(taskData)
+  });
+  if (!res.ok) throw new Error('Failed to add task');
+  return res.json();
+};
