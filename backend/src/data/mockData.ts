@@ -17,6 +17,9 @@ export interface Task {
   end: string;
   progress: number;
   dependencies: string[];
+  type?: 'task' | 'project' | 'milestone';
+  project?: string; // ID of the parent task/project
+  hideChildren?: boolean;
 }
 
 export const projects: Project[] = [
@@ -31,16 +34,20 @@ export const projects: Project[] = [
 
 export const projectSchedules: Record<string, Task[]> = {
   "1": [
-    { id: "t1", name: "Site Preparation", start: "2025-01-01", end: "2025-02-15", progress: 100, dependencies: [] },
-    { id: "t2", name: "Earthwork", start: "2025-02-16", end: "2025-05-30", progress: 40, dependencies: ["t1"] },
-    { id: "t3", name: "Structure", start: "2025-06-01", end: "2025-10-31", progress: 0, dependencies: ["t2"] },
-    { id: "t4", name: "Pavement", start: "2025-11-01", end: "2026-03-31", progress: 0, dependencies: ["t3"] },
+    { id: "p1", name: "Road 80 Project", start: "2025-01-01", end: "2026-03-31", progress: 40, dependencies: [], type: "project", hideChildren: false },
+    { id: "ph1", name: "Phase 1: Foundation", start: "2025-01-01", end: "2025-05-30", progress: 60, dependencies: [], type: "project", project: "p1", hideChildren: false },
+    { id: "t1", name: "Site Preparation", start: "2025-01-01", end: "2025-02-15", progress: 100, dependencies: [], type: "task", project: "ph1" },
+    { id: "t2", name: "Earthwork", start: "2025-02-16", end: "2025-05-30", progress: 40, dependencies: ["t1"], type: "task", project: "ph1" },
+    { id: "ph2", name: "Phase 2: Construction", start: "2025-06-01", end: "2026-03-31", progress: 0, dependencies: ["ph1"], type: "project", project: "p1", hideChildren: false },
+    { id: "t3", name: "Structure", start: "2025-06-01", end: "2025-10-31", progress: 0, dependencies: [], type: "task", project: "ph2" },
+    { id: "t4", name: "Pavement", start: "2025-11-01", end: "2026-03-31", progress: 0, dependencies: ["t3"], type: "task", project: "ph2" },
   ],
   "7": [
-    { id: "t1", name: "Site Preparation", start: "2025-11-06", end: "2025-12-31", progress: 100, dependencies: [] },
-    { id: "t2", name: "Excavation/Cut", start: "2026-01-01", end: "2026-03-15", progress: 100, dependencies: ["t1"] },
-    { id: "t3", name: "Ground Improvement", start: "2026-03-16", end: "2026-07-31", progress: 95, dependencies: ["t2"] },
-    { id: "t4", name: "PVD + Preload", start: "2026-08-01", end: "2026-12-31", progress: 92, dependencies: ["t3"] },
+    { id: "p7", name: "Jalan Segmen II", start: "2025-11-06", end: "2026-12-31", progress: 95, dependencies: [], type: "project", hideChildren: false },
+    { id: "t1", name: "Site Preparation", start: "2025-11-06", end: "2025-12-31", progress: 100, dependencies: [], type: "task", project: "p7" },
+    { id: "t2", name: "Excavation/Cut", start: "2026-01-01", end: "2026-03-15", progress: 100, dependencies: ["t1"], type: "task", project: "p7" },
+    { id: "t3", name: "Ground Improvement", start: "2026-03-16", end: "2026-07-31", progress: 95, dependencies: ["t2"], type: "task", project: "p7" },
+    { id: "t4", name: "PVD + Preload", start: "2026-08-01", end: "2026-12-31", progress: 92, dependencies: ["t3"], type: "task", project: "p7" },
   ]
 };
 

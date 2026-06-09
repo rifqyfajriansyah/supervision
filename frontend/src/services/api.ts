@@ -17,6 +17,9 @@ export interface Task {
   end: string;
   progress: number;
   dependencies: string[];
+  type?: 'task' | 'project' | 'milestone';
+  project?: string;
+  hideChildren?: boolean;
 }
 
 const API_BASE_URL = import.meta.env.MODE === 'production' ? '/api' : 'http://localhost:3001/api';

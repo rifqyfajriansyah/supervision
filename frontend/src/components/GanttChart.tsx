@@ -34,7 +34,9 @@ const GanttChart = ({ projectId }: Props) => {
           name: t.name,
           id: t.id,
           progress: t.progress,
-          type: 'task',
+          type: (t.type as 'task' | 'project' | 'milestone') || 'task',
+          project: t.project,
+          hideChildren: t.hideChildren,
           dependencies: t.dependencies || [],
           styles: { progressColor: '#3B82F6', progressSelectedColor: '#2563EB' }
         }));
@@ -127,6 +129,72 @@ const GanttChart = ({ projectId }: Props) => {
     setNewTaskDependencies([]);
   };
 
+  const handleExpanderClick = (task: GanttTask) => {
+    setTasks(tasks.map(t => (t.id === task.id ? { ...task, hideChildren: !task.hideChildren } : t)));
+  };
+
+  const CustomTaskListHeader: React.FC<{ headerHeight: number; rowWidth: string; fontFamily: string; fontSize: string; }> = ({ headerHeight, fontFamily, fontSize, rowWidth }) => {
+    return (
+      <div className="flex border-b border-gray-300 bg-gray-50 text-gray-700" style={{ height: headerHeight, fontFamily, fontSize, width: rowWidth }}>
+        <div className="flex-1 flex items-center justify-center border-r border-gray-300 min-w-0 font-semibold px-2 text-center text-sm">Task name</div>
+        <div className="w-24 flex items-center justify-center border-r border-gray-300 min-w-0 font-semibold px-2 text-center text-sm">Start time</div>
+        <div className="w-16 flex items-center justify-center border-r border-gray-300 min-w-0 font-semibold px-2 text-center text-sm">Duration</div>
+        <div className="w-8 flex items-center justify-center border-r border-gray-300 font-semibold text-center text-gray-400 text-sm">+</div>
+      </div>
+    );
+  };
+
+  const CustomTaskListTable: React.FC<{
+    rowHeight: number;
+    rowWidth: string;
+    fontFamily: string;
+    fontSize: string;
+    locale: string;
+    tasks: GanttTask[];
+    selectedTaskId: string;
+    setSelectedTask: (taskId: string) => void;
+    onExpanderClick: (task: GanttTask) => void;
+  }> = ({ rowHeight, rowWidth, tasks: visibleTasks, fontFamily, fontSize, onExpanderClick }) => {
+    return (
+      <div style={{ fontFamily, fontSize, width: rowWidth }} className="bg-white">
+        {visibleTasks.map(t => {
+          const duration = Math.ceil((t.end.getTime() - t.start.getTime()) / (1000 * 60 * 60 * 24));
+          let indent = 0;
+          let current = t;
+          while (current.project) {
+            indent++;
+            // We search in the FULL tasks list to find parents reliably
+            const parent = tasks.find(pt => pt.id === current.project);
+            if (!parent) break;
+            current = parent;
+          }
+
+          return (
+            <div key={t.id} className="flex border-b border-gray-200 text-gray-800" style={{ height: rowHeight }}>
+              <div className="flex-1 flex items-center border-r border-gray-200 min-w-0 px-2" style={{ paddingLeft: `${indent * 1.5 + 0.5}rem` }}>
+                {t.type === 'project' ? (
+                  <button className="mr-1 text-gray-400 hover:text-gray-600 text-xs" onClick={() => onExpanderClick(t)}>
+                    {t.hideChildren ? '▶' : '▼'}
+                  </button>
+                ) : <span className="mr-4"></span>}
+                <span className="truncate text-sm">{t.name}</span>
+              </div>
+              <div className="w-24 flex items-center justify-center border-r border-gray-200 min-w-0 px-2 text-center text-xs">
+                {t.start.toISOString().split('T')[0]}
+              </div>
+              <div className="w-16 flex items-center justify-center border-r border-gray-200 min-w-0 px-2 text-center text-xs">
+                {duration}
+              </div>
+              <div className="w-8 flex items-center justify-center border-r border-gray-200 text-gray-400 hover:bg-gray-100 cursor-pointer text-sm" onClick={() => openAddModal()}>
+                +
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   if (isLoading) return <div className="text-gray-400 flex justify-center items-center h-full">Loading Schedule...</div>;
 
   return (
@@ -160,6 +228,10 @@ const GanttChart = ({ projectId }: Props) => {
            <Gantt 
              tasks={tasks} 
              viewMode={viewMode} 
+             listCellWidth="400px"
+             TaskListHeader={CustomTaskListHeader}
+             TaskListTable={CustomTaskListTable}
+             onExpanderClick={handleExpanderClick}
              onDoubleClick={(task) => {
                openEditModal(task);
                setIsModalOpen(true);

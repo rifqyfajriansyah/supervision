@@ -40,7 +40,8 @@ export const addTaskToSchedule = (req: Request, res: Response) => {
 };
 
 export const editTaskInSchedule = (req: Request, res: Response) => {
-  const { id, taskId } = req.params;
+  const id = req.params.id as string;
+  const taskId = req.params.taskId as string;
   const taskData = req.body;
   try {
     const updatedTask = projectService.editTask(id, taskId, taskData);
