@@ -93,8 +93,8 @@ const Dashboard = () => {
 
       {/* Expanded View Modal */}
       {expandedView && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center p-8">
-          <div className="bg-surface border border-gray-700 rounded-xl shadow-2xl flex flex-col w-full h-full max-w-7xl max-h-[90vh]">
+        <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center p-4">
+          <div className="bg-surface border border-gray-700 rounded-xl shadow-2xl flex flex-col w-full h-full">
             <div className="flex justify-between items-center p-4 border-b border-gray-700">
               <h2 className="text-xl font-bold text-white">
                 {expandedView === 'map' && 'Project Map (Detailed View)'}
@@ -108,7 +108,7 @@ const Dashboard = () => {
             <div className="flex-1 overflow-hidden p-6 relative">
                {expandedView === 'map' && <MapComponent projects={projects} selectedId={selectedProjectId} />}
                {expandedView === 'scurve' && <SCurveChart projectId={selectedProjectId} />}
-               {expandedView === 'gantt' && <GanttChart projectId={selectedProjectId} />}
+               {expandedView === 'gantt' && <GanttChart projectId={selectedProjectId} isExpanded={true} />}
             </div>
           </div>
         </div>

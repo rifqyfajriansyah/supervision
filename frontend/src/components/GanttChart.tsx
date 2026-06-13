@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Gantt, ViewMode } from 'gantt-task-react';
 import type { Task as GanttTask } from 'gantt-task-react';
 import 'gantt-task-react/dist/index.css';
@@ -8,9 +8,182 @@ import { Plus, X } from 'lucide-react';
 
 interface Props {
   projectId: string;
+  isExpanded?: boolean;
 }
 
-const GanttChart = ({ projectId }: Props) => {
+const DependencyMultiSelect = ({ 
+  tasks, 
+  editingTaskId, 
+  newTaskParent, 
+  newTaskDependencies, 
+  setNewTaskDependencies 
+}: { 
+  tasks: GanttTask[], 
+  editingTaskId: string | null, 
+  newTaskParent: string, 
+  newTaskDependencies: string[], 
+  setNewTaskDependencies: (deps: string[]) => void 
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const validDeps = tasks.filter(t => {
+    if (t.id === editingTaskId) return false;
+    return !newTaskParent ? !t.project : t.project === newTaskParent;
+  });
+
+  const selectedTasks = validDeps.filter(t => newTaskDependencies.includes(t.id));
+  const availableTasks = validDeps.filter(t => !newTaskDependencies.includes(t.id) && t.name.toLowerCase().includes(search.toLowerCase()));
+
+  const removeDep = (id: string) => {
+    setNewTaskDependencies(newTaskDependencies.filter(depId => depId !== id));
+  };
+
+  const addDep = (id: string) => {
+    setNewTaskDependencies([...newTaskDependencies, id]);
+    setSearch('');
+  };
+
+  if (validDeps.length === 0) {
+     return <div className="text-gray-500 text-sm italic px-3 py-2 bg-gray-800/50 border border-gray-700 rounded-lg">Tidak ada task setara yang tersedia.</div>;
+  }
+
+  return (
+    <div className="relative flex-1" ref={wrapperRef}>
+      <div 
+        className="min-h-[42px] w-full bg-gray-800 border border-gray-600 rounded-lg p-1.5 flex flex-wrap gap-1.5 cursor-text focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all shadow-inner"
+        onClick={() => setIsOpen(true)}
+      >
+        {selectedTasks.map(t => (
+          <span key={t.id} className="bg-blue-600/30 text-blue-300 border border-blue-500/40 px-2 py-1 rounded text-xs flex items-center gap-1.5 font-medium shadow-sm">
+            {t.name}
+            <button 
+              type="button" 
+              onClick={(e) => { e.stopPropagation(); removeDep(t.id); }} 
+              className="hover:text-red-400 hover:bg-red-400/20 rounded-full p-0.5 transition-colors"
+            >
+              <X size={12}/>
+            </button>
+          </span>
+        ))}
+        <input 
+          type="text" 
+          className="flex-1 bg-transparent min-w-[120px] text-sm text-gray-200 px-1 py-0.5 outline-none"
+          placeholder={selectedTasks.length === 0 ? "Cari task..." : ""}
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+        />
+      </div>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-gray-700 border border-gray-600 rounded-lg shadow-2xl z-50 py-1">
+          {availableTasks.length > 0 ? (
+            availableTasks.map(t => (
+              <div 
+                key={t.id} 
+                className="px-3 py-2.5 text-sm text-gray-200 hover:bg-blue-600 cursor-pointer transition-colors"
+                onClick={() => addDep(t.id)}
+              >
+                {t.name}
+              </div>
+            ))
+          ) : (
+            <div className="px-3 py-3 text-sm text-gray-400 italic text-center">
+              {search ? "Task tidak ditemukan" : "Semua task sudah dipilih"}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const InlineAddPopover = ({ 
+  parentId, 
+  onClose, 
+  onSave, 
+  isAdding 
+}: { 
+  parentId: string, 
+  onClose: () => void, 
+  onSave: (parentId: string, data: {name: string, start: string, end: string}) => void, 
+  isAdding: boolean 
+}) => {
+  const [name, setName] = useState('');
+  const [start, setStart] = useState('');
+  const [end, setEnd] = useState('');
+
+  return (
+    <div 
+      className="w-72 bg-white border border-gray-200 shadow-2xl rounded-xl p-4 text-left cursor-default"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex justify-between items-center mb-3">
+        <h4 className="font-semibold text-gray-800 text-sm">Add Sub-task</h4>
+        <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors">
+          <X size={16} />
+        </button>
+      </div>
+      <div className="flex flex-col gap-3">
+        <div>
+          <label className="block text-xs text-gray-500 mb-1">Task Name</label>
+          <input 
+            type="text" 
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+            placeholder="e.g. Phase 1"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoFocus
+          />
+        </div>
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <label className="block text-xs text-gray-500 mb-1">Start</label>
+            <input 
+              type="date" 
+              className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+              value={start}
+              onChange={(e) => setStart(e.target.value)}
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-xs text-gray-500 mb-1">End</label>
+            <input 
+              type="date" 
+              className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+              value={end}
+              onChange={(e) => setEnd(e.target.value)}
+            />
+          </div>
+        </div>
+        <button 
+          onClick={() => onSave(parentId, { name, start, end })}
+          disabled={!name || !start || !end || isAdding}
+          className="mt-2 w-full bg-blue-600 text-white rounded py-2 text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+        >
+          {isAdding ? 'Saving...' : 'Save Task'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const GanttChart = ({ projectId, isExpanded = false }: Props) => {
   const [tasks, setTasks] = useState<GanttTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -21,8 +194,13 @@ const GanttChart = ({ projectId }: Props) => {
   const [newTaskStart, setNewTaskStart] = useState('');
   const [newTaskEnd, setNewTaskEnd] = useState('');
   const [newTaskDependencies, setNewTaskDependencies] = useState<string[]>([]);
+  const [newTaskParent, setNewTaskParent] = useState<string>('');
   const [isAdding, setIsAdding] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Day);
+  
+  // Inline Popover states
+  const [inlineAddParentId, setInlineAddParentId] = useState<string | null>(null);
+  const [inlinePopoverPos, setInlinePopoverPos] = useState<{top: number, left: number} | null>(null);
 
   const loadSchedule = () => {
     setIsLoading(true);
@@ -64,7 +242,8 @@ const GanttChart = ({ projectId }: Props) => {
           name: newTaskName,
           start: newTaskStart,
           end: newTaskEnd,
-          dependencies: newTaskDependencies
+          dependencies: newTaskDependencies,
+          project: newTaskParent || undefined
         });
       } else {
         await addTask(projectId, {
@@ -72,7 +251,8 @@ const GanttChart = ({ projectId }: Props) => {
           start: newTaskStart,
           end: newTaskEnd,
           progress: 0,
-          dependencies: newTaskDependencies
+          dependencies: newTaskDependencies,
+          project: newTaskParent || undefined
         });
       }
       
@@ -82,6 +262,7 @@ const GanttChart = ({ projectId }: Props) => {
       setNewTaskStart('');
       setNewTaskEnd('');
       setNewTaskDependencies([]);
+      setNewTaskParent('');
       loadSchedule();
     } catch (err) {
       console.error(err);
@@ -97,6 +278,7 @@ const GanttChart = ({ projectId }: Props) => {
     setNewTaskStart('');
     setNewTaskEnd('');
     setNewTaskDependencies([]);
+    setNewTaskParent('');
     setIsModalOpen(true);
   };
 
@@ -107,6 +289,7 @@ const GanttChart = ({ projectId }: Props) => {
     setNewTaskStart(task.start.toISOString().split('T')[0]);
     setNewTaskEnd(task.end.toISOString().split('T')[0]);
     setNewTaskDependencies(task.dependencies || []);
+    setNewTaskParent(task.project || '');
   };
 
   const handleDateChange = async (task: GanttTask) => {
@@ -127,10 +310,32 @@ const GanttChart = ({ projectId }: Props) => {
     setNewTaskStart('');
     setNewTaskEnd('');
     setNewTaskDependencies([]);
+    setNewTaskParent('');
   };
 
   const handleExpanderClick = (task: GanttTask) => {
-    setTasks(tasks.map(t => (t.id === task.id ? { ...task, hideChildren: !task.hideChildren } : t)));
+    setTasks(prevTasks => prevTasks.map(t => (t.id === task.id ? { ...t, hideChildren: !t.hideChildren } : t)));
+  };
+
+  const handleInlineSave = async (parentId: string, data: {name: string, start: string, end: string}) => {
+    setIsAdding(true);
+    try {
+      await addTask(projectId, {
+        name: data.name,
+        start: data.start,
+        end: data.end,
+        progress: 0,
+        dependencies: [],
+        project: parentId
+      });
+      setInlineAddParentId(null);
+      loadSchedule();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save inline task');
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   const CustomTaskListHeader: React.FC<{ headerHeight: number; rowWidth: string; fontFamily: string; fontSize: string; }> = ({ headerHeight, fontFamily, fontSize, rowWidth }) => {
@@ -138,8 +343,9 @@ const GanttChart = ({ projectId }: Props) => {
       <div className="flex border-b border-gray-300 bg-gray-50 text-gray-700" style={{ height: headerHeight, fontFamily, fontSize, width: rowWidth }}>
         <div className="flex-1 flex items-center justify-center border-r border-gray-300 min-w-0 font-semibold px-2 text-center text-sm">Task name</div>
         <div className="w-24 flex items-center justify-center border-r border-gray-300 min-w-0 font-semibold px-2 text-center text-sm">Start time</div>
+        <div className="w-24 flex items-center justify-center border-r border-gray-300 min-w-0 font-semibold px-2 text-center text-sm">End time</div>
         <div className="w-16 flex items-center justify-center border-r border-gray-300 min-w-0 font-semibold px-2 text-center text-sm">Duration</div>
-        <div className="w-8 flex items-center justify-center border-r border-gray-300 font-semibold text-center text-gray-400 text-sm">+</div>
+        {isExpanded && <div className="w-8 flex items-center justify-center border-r border-gray-300 font-semibold text-center text-gray-400 text-sm">+</div>}
       </div>
     );
   };
@@ -171,23 +377,52 @@ const GanttChart = ({ projectId }: Props) => {
 
           return (
             <div key={t.id} className="flex border-b border-gray-200 text-gray-800" style={{ height: rowHeight }}>
-              <div className="flex-1 flex items-center border-r border-gray-200 min-w-0 px-2" style={{ paddingLeft: `${indent * 1.5 + 0.5}rem` }}>
+              <div 
+                className={`flex-1 flex items-center border-r border-gray-200 min-w-0 px-2 ${t.type === 'project' ? 'cursor-pointer hover:bg-gray-50' : ''}`} 
+                style={{ paddingLeft: `${indent * 1.5 + 0.5}rem` }}
+                onClick={(e) => {
+                  if (t.type === 'project') {
+                    e.stopPropagation();
+                    onExpanderClick(t);
+                  }
+                }}
+              >
                 {t.type === 'project' ? (
-                  <button className="mr-1 text-gray-400 hover:text-gray-600 text-xs" onClick={() => onExpanderClick(t)}>
+                  <span className="mr-1 text-gray-400 text-xs">
                     {t.hideChildren ? '▶' : '▼'}
-                  </button>
+                  </span>
                 ) : <span className="mr-4"></span>}
                 <span className="truncate text-sm">{t.name}</span>
               </div>
               <div className="w-24 flex items-center justify-center border-r border-gray-200 min-w-0 px-2 text-center text-xs">
                 {t.start.toISOString().split('T')[0]}
               </div>
+              <div className="w-24 flex items-center justify-center border-r border-gray-200 min-w-0 px-2 text-center text-xs">
+                {t.end.toISOString().split('T')[0]}
+              </div>
               <div className="w-16 flex items-center justify-center border-r border-gray-200 min-w-0 px-2 text-center text-xs">
                 {duration}
               </div>
-              <div className="w-8 flex items-center justify-center border-r border-gray-200 text-gray-400 hover:bg-gray-100 cursor-pointer text-sm" onClick={() => openAddModal()}>
-                +
-              </div>
+              {isExpanded && (
+                <div className="w-8 flex justify-center border-r border-gray-200 text-gray-400 text-sm relative">
+                  <div 
+                    className="w-full h-full flex items-center justify-center hover:bg-gray-100 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (inlineAddParentId === t.id) {
+                         setInlineAddParentId(null);
+                         setInlinePopoverPos(null);
+                      } else {
+                         setInlineAddParentId(t.id);
+                         const rect = e.currentTarget.getBoundingClientRect();
+                         setInlinePopoverPos({ top: rect.bottom + 4, left: rect.right - 288 }); // 288 is w-72 approx
+                      }
+                    }}
+                  >
+                    +
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -212,13 +447,15 @@ const GanttChart = ({ projectId }: Props) => {
             <option value={ViewMode.Month}>Month</option>
           </select>
         </div>
-        <button 
-          onClick={openAddModal}
-          className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Task Manager
-        </button>
+        {isExpanded && (
+          <button 
+            onClick={openAddModal}
+            className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700 flex items-center gap-2"
+          >
+            <Plus size={16} />
+            Task Manager
+          </button>
+        )}
       </div>
       
       <div className="flex-1 overflow-auto">
@@ -228,7 +465,7 @@ const GanttChart = ({ projectId }: Props) => {
            <Gantt 
              tasks={tasks} 
              viewMode={viewMode} 
-             listCellWidth="400px"
+             listCellWidth={isExpanded ? "500px" : "468px"}
              TaskListHeader={CustomTaskListHeader}
              TaskListTable={CustomTaskListTable}
              onExpanderClick={handleExpanderClick}
@@ -243,6 +480,26 @@ const GanttChart = ({ projectId }: Props) => {
            />
         )}
       </div>
+
+      {/* Render Inline Popover using fixed positioning to avoid clipping */}
+      {inlineAddParentId && inlinePopoverPos && (
+        <div 
+          style={{ position: 'fixed', top: inlinePopoverPos.top, left: inlinePopoverPos.left, zIndex: 10000 }}
+        >
+          <InlineAddPopover 
+            parentId={inlineAddParentId}
+            onClose={() => {
+              setInlineAddParentId(null);
+              setInlinePopoverPos(null);
+            }}
+            onSave={(parentId, data) => {
+              handleInlineSave(parentId, data);
+              setInlinePopoverPos(null);
+            }}
+            isAdding={isAdding}
+          />
+        </div>
+      )}
 
       {/* Task Manager Modal */}
       {isModalOpen && (
@@ -273,9 +530,26 @@ const GanttChart = ({ projectId }: Props) => {
                       <td colSpan={5} className="px-4 py-6 text-center text-gray-500 italic">No existing tasks yet.</td>
                     </tr>
                   )}
-                  {tasks.map(t => (
+                  {tasks.map(t => {
+                    let indent = 0;
+                    let current = t;
+                    while (current.project) {
+                      indent++;
+                      const parent = tasks.find(pt => pt.id === current.project);
+                      if (!parent) break;
+                      current = parent;
+                    }
+
+                    return (
                     <tr key={t.id} className="border-t border-gray-700 hover:bg-gray-800 transition-colors">
-                      <td className="px-4 py-3 font-medium">{t.name}</td>
+                      <td className="px-4 py-3 font-medium">
+                        <div style={{ paddingLeft: `${indent * 1.5}rem` }} className="flex items-center gap-2">
+                           <span className="text-gray-500 text-xs w-4 flex justify-center">
+                             {t.type === 'project' ? '📁' : (indent > 0 ? '└─' : '📄')}
+                           </span>
+                           <span>{t.name}</span>
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-gray-400">{t.start.toISOString().split('T')[0]}</td>
                       <td className="px-4 py-3 text-gray-400">{t.end.toISOString().split('T')[0]}</td>
                       <td className="px-4 py-3 text-gray-400">
@@ -292,7 +566,8 @@ const GanttChart = ({ projectId }: Props) => {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -314,31 +589,41 @@ const GanttChart = ({ projectId }: Props) => {
                    />
                  </div>
                  
-                 <div className="col-span-2 sm:col-span-1 row-span-3">
-                   <label className="block text-sm text-gray-400 mb-1">Dependencies (Pilih Task Sebelumnya)</label>
-                   <div className="h-40 overflow-y-auto bg-gray-800 border border-gray-600 rounded p-2">
-                     {tasks.filter(t => t.id !== editingTaskId).length === 0 ? (
-                       <div className="text-gray-500 text-sm italic p-2">Belum ada task lain yang bisa dipilih</div>
-                     ) : (
-                       tasks.filter(t => t.id !== editingTaskId).map(task => (
-                         <label key={task.id} className="flex items-center gap-2 text-sm text-gray-300 py-1.5 px-2 hover:bg-gray-700 rounded cursor-pointer transition-colors">
-                           <input 
-                             type="checkbox"
-                             className="accent-blue-500 w-4 h-4"
-                             checked={newTaskDependencies.includes(task.id)}
-                             onChange={(e) => {
-                               if (e.target.checked) {
-                                 setNewTaskDependencies([...newTaskDependencies, task.id]);
-                               } else {
-                                 setNewTaskDependencies(newTaskDependencies.filter(id => id !== task.id));
-                               }
-                             }}
-                           />
-                           {task.name}
-                         </label>
-                       ))
-                     )}
-                   </div>
+                 <div className="col-span-2 sm:col-span-1 row-span-4 flex flex-col">
+                   <label className="block text-sm text-gray-400 mb-1">Dependencies (Cari Task Sebelumnya)</label>
+                   <DependencyMultiSelect 
+                     tasks={tasks}
+                     editingTaskId={editingTaskId}
+                     newTaskParent={newTaskParent}
+                     newTaskDependencies={newTaskDependencies}
+                     setNewTaskDependencies={setNewTaskDependencies}
+                   />
+                 </div>
+
+                 <div className="col-span-2 sm:col-span-1">
+                   <label className="block text-sm text-gray-400 mb-1">Parent Task (Induk)</label>
+                   <select 
+                     className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                     value={newTaskParent}
+                     onChange={(e) => {
+                       setNewTaskParent(e.target.value);
+                       setNewTaskDependencies([]);
+                     }}
+                   >
+                     <option value="">-- Root Task (Tidak Ada Parent) --</option>
+                     {tasks.filter(t => t.id !== editingTaskId).map(t => {
+                       let indent = 0;
+                       let current = t;
+                       while (current.project) {
+                         indent++;
+                         const parent = tasks.find(pt => pt.id === current.project);
+                         if (!parent) break;
+                         current = parent;
+                       }
+                       const prefix = "— ".repeat(indent);
+                       return <option key={t.id} value={t.id}>{prefix}{t.name}</option>;
+                     })}
+                   </select>
                  </div>
 
                  <div className="col-span-2 sm:col-span-1">
