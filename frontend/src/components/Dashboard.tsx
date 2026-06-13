@@ -53,7 +53,7 @@ const Dashboard = () => {
           </div>
           <div className="flex-1 bg-surface rounded-xl p-4 shadow-lg border border-gray-700 overflow-hidden flex flex-col">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-300">Project Map</h2>
+              <h2 className="text-lg font-semibold text-gray-300">Project Map Zahin</h2>
               <button onClick={() => setExpandedView('map')} className="text-gray-400 hover:text-white" title="Expand Map">
                 <Maximize2 size={18} />
               </button>
