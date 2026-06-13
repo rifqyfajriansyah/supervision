@@ -38,4 +38,27 @@ export class ProjectService {
     projectSchedules[projectId][taskIndex] = updatedTask;
     return updatedTask;
   }
+
+  public reorderTasks(projectId: string, taskIds: string[]): boolean {
+    if (!projectSchedules[projectId]) return false;
+    
+    const taskMap = new Map(projectSchedules[projectId].map(t => [t.id, t]));
+    const newSchedule: Task[] = [];
+    
+    for (const id of taskIds) {
+      if (taskMap.has(id)) {
+        newSchedule.push(taskMap.get(id)!);
+      }
+    }
+    
+    if (newSchedule.length !== projectSchedules[projectId].length) {
+      const addedIds = new Set(taskIds);
+      for (const t of projectSchedules[projectId]) {
+        if (!addedIds.has(t.id)) newSchedule.push(t);
+      }
+    }
+    
+    projectSchedules[projectId] = newSchedule;
+    return true;
+  }
 }

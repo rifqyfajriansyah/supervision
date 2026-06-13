@@ -52,12 +52,27 @@ export const addTask = async (projectId: string, taskData: Omit<Task, 'id'>): Pr
   return res.json();
 };
 
-export const editTask = async (projectId: string, taskId: string, taskData: Partial<Omit<Task, 'id'>>): Promise<Task> => {
-  const res = await fetch(`${API_BASE_URL}/projects/${projectId}/schedule/${taskId}`, {
+export const editTask = async (projectId: string, taskId: string, taskData: Partial<Task>): Promise<Task> => {
+  const response = await fetch(`${API_BASE_URL}/projects/${projectId}/schedule/${taskId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(taskData),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to edit task');
+  }
+  return response.json();
+};
+
+export const reorderTasks = async (projectId: string, taskIds: string[]): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/projects/${projectId}/schedule/reorder`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(taskData)
+    body: JSON.stringify({ taskIds }),
   });
-  if (!res.ok) throw new Error('Failed to edit task');
-  return res.json();
+  if (!response.ok) {
+    throw new Error('Failed to reorder tasks');
+  }
 };

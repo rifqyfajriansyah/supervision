@@ -54,3 +54,19 @@ export const editTaskInSchedule = (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to edit task' });
   }
 };
+
+export const reorderTasksInSchedule = (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const { taskIds } = req.body;
+  
+  if (!taskIds || !Array.isArray(taskIds)) {
+    return res.status(400).json({ error: 'Invalid taskIds array' });
+  }
+  
+  const success = projectService.reorderTasks(id, taskIds);
+  if (success) {
+    res.json({ message: 'Reordered successfully' });
+  } else {
+    res.status(404).json({ error: 'Project schedule not found' });
+  }
+};

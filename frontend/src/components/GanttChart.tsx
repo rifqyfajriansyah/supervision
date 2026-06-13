@@ -1,10 +1,51 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { Gantt, ViewMode } from 'gantt-task-react';
 import type { Task as GanttTask } from 'gantt-task-react';
 import 'gantt-task-react/dist/index.css';
-import { fetchProjectSchedule, addTask, editTask } from '../services/api';
+import { fetchProjectSchedule, addTask, editTask, reorderTasks } from '../services/api';
 import type { Task } from '../services/api';
 import { Plus, X } from 'lucide-react';
+import wbsData from '../data/wbsOptions.json';
+
+const findWbsNode = (name: string, nodes: any[]): any | null => {
+  if (!name) return null;
+  for (const node of nodes) {
+    if (node.name === name) return node;
+    if (node.children && node.children.length > 0) {
+      const found = findWbsNode(name, node.children);
+      if (found) return found;
+    }
+  }
+  return null;
+};
+
+const generateWBSMap = (tasks: GanttTask[]) => {
+  const wbsMap: Record<string, string> = {};
+  const byParent: Record<string, GanttTask[]> = {};
+  const roots: GanttTask[] = [];
+
+  tasks.forEach(t => {
+    if (t.project) {
+      if (!byParent[t.project]) byParent[t.project] = [];
+      byParent[t.project].push(t);
+    } else {
+      roots.push(t);
+    }
+  });
+
+  const assignWBS = (nodes: GanttTask[], prefix: string) => {
+    nodes.forEach((node, index) => {
+      const currentWBS = prefix ? `${prefix}.${index + 1}` : `${index + 1}`;
+      wbsMap[node.id] = currentWBS;
+      if (byParent[node.id]) {
+        assignWBS(byParent[node.id], currentWBS);
+      }
+    });
+  };
+
+  assignWBS(roots, "");
+  return wbsMap;
+};
 
 interface Props {
   projectId: string;
@@ -113,16 +154,101 @@ const DependencyMultiSelect = ({
   );
 };
 
+const TaskNameCombobox = ({
+  value,
+  onChange,
+  options,
+  placeholder = "e.g. Phase 1",
+  theme = "dark"
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  options: string[];
+  placeholder?: string;
+  theme?: "dark" | "light";
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const isExactMatch = options.includes(value);
+  const filteredOptions = isExactMatch 
+    ? options 
+    : options.filter(opt => opt.toLowerCase().includes(value.toLowerCase()));
+  const isDark = theme === "dark";
+
+  return (
+    <div className="relative w-full" ref={wrapperRef}>
+      <input
+        type="text"
+        className={`w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          isDark 
+            ? "bg-gray-800 border-gray-600 text-white" 
+            : "bg-white border-gray-300 text-gray-800"
+        }`}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setIsOpen(true);
+        }}
+        onFocus={(e) => {
+          setIsOpen(true);
+          e.target.select();
+        }}
+        required={isDark}
+      />
+      {isOpen && options.length > 0 && (
+        <div className={`absolute z-50 w-full mt-1 border rounded-md shadow-lg max-h-60 overflow-auto ${
+          isDark ? "bg-gray-700 border-gray-600" : "bg-white border-gray-200"
+        }`}>
+          {filteredOptions.length > 0 ? (
+            filteredOptions.map((opt, idx) => (
+              <div
+                key={idx}
+                className={`px-3 py-2 cursor-pointer text-sm ${
+                  isDark ? "text-white hover:bg-blue-600" : "text-gray-800 hover:bg-blue-50"
+                }`}
+                onClick={() => {
+                  onChange(opt);
+                  setIsOpen(false);
+                }}
+              >
+                {opt}
+              </div>
+            ))
+          ) : (
+            <div className={`px-3 py-2 text-sm italic ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              Ketik untuk custom text...
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const InlineAddPopover = ({ 
   parentId, 
   onClose, 
   onSave, 
-  isAdding 
+  isAdding,
+  suggestedOptions 
 }: { 
   parentId: string, 
   onClose: () => void, 
   onSave: (parentId: string, data: {name: string, start: string, end: string}) => void, 
-  isAdding: boolean 
+  isAdding: boolean,
+  suggestedOptions: string[]
 }) => {
   const [name, setName] = useState('');
   const [start, setStart] = useState('');
@@ -142,13 +268,11 @@ const InlineAddPopover = ({
       <div className="flex flex-col gap-3">
         <div>
           <label className="block text-xs text-gray-500 mb-1">Task Name</label>
-          <input 
-            type="text" 
-            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
-            placeholder="e.g. Phase 1"
+          <TaskNameCombobox 
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            autoFocus
+            onChange={setName}
+            options={suggestedOptions}
+            theme="light"
           />
         </div>
         <div className="flex gap-2">
@@ -197,10 +321,42 @@ const GanttChart = ({ projectId, isExpanded = false }: Props) => {
   const [newTaskParent, setNewTaskParent] = useState<string>('');
   const [isAdding, setIsAdding] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Day);
+  const [minStartDate, setMinStartDate] = useState('');
   
   // Inline Popover states
   const [inlineAddParentId, setInlineAddParentId] = useState<string | null>(null);
   const [inlinePopoverPos, setInlinePopoverPos] = useState<{top: number, left: number} | null>(null);
+
+  const wbsMap = useMemo(() => generateWBSMap(tasks), [tasks]);
+
+  useEffect(() => {
+    if (newTaskDependencies.length > 0) {
+      let maxDate = new Date(0);
+      newTaskDependencies.forEach(depId => {
+        const depTask = tasks.find(t => t.id === depId);
+        if (depTask && depTask.end > maxDate) {
+          maxDate = depTask.end;
+        }
+      });
+      if (maxDate.getTime() > 0) {
+        const minStr = maxDate.toISOString().split('T')[0];
+        setMinStartDate(minStr);
+        if (!newTaskStart || new Date(newTaskStart) < maxDate) {
+          setNewTaskStart(minStr);
+        }
+      } else {
+        setMinStartDate('');
+      }
+    } else {
+      setMinStartDate('');
+    }
+  }, [newTaskDependencies, tasks]);
+
+  useEffect(() => {
+    if (newTaskStart && newTaskEnd && new Date(newTaskEnd) < new Date(newTaskStart)) {
+      setNewTaskEnd(newTaskStart);
+    }
+  }, [newTaskStart, newTaskEnd]);
 
   const loadSchedule = () => {
     setIsLoading(true);
@@ -280,6 +436,49 @@ const GanttChart = ({ projectId, isExpanded = false }: Props) => {
     setNewTaskDependencies([]);
     setNewTaskParent('');
     setIsModalOpen(true);
+  };
+
+  const moveTask = async (task: GanttTask, direction: 'up' | 'down') => {
+    const byParent: Record<string, GanttTask[]> = { root: [] };
+    tasks.forEach(t => {
+      const p = t.project || 'root';
+      if (!byParent[p]) byParent[p] = [];
+      byParent[p].push(t);
+    });
+
+    const p = task.project || 'root';
+    const siblings = byParent[p];
+    const idx = siblings.findIndex(t => t.id === task.id);
+    
+    if (direction === 'up' && idx > 0) {
+      const temp = siblings[idx - 1];
+      siblings[idx - 1] = siblings[idx];
+      siblings[idx] = temp;
+    } else if (direction === 'down' && idx < siblings.length - 1) {
+      const temp = siblings[idx + 1];
+      siblings[idx + 1] = siblings[idx];
+      siblings[idx] = temp;
+    } else {
+      return;
+    }
+
+    const newTaskIds: string[] = [];
+    const traverse = (parentId: string) => {
+      const children = byParent[parentId] || [];
+      for (const child of children) {
+        newTaskIds.push(child.id);
+        traverse(child.id);
+      }
+    };
+    traverse('root');
+
+    try {
+      await reorderTasks(projectId, newTaskIds);
+      loadSchedule();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to reorder');
+    }
   };
 
   const openEditModal = (task: GanttTask) => {
@@ -392,7 +591,7 @@ const GanttChart = ({ projectId, isExpanded = false }: Props) => {
                     {t.hideChildren ? '▶' : '▼'}
                   </span>
                 ) : <span className="mr-4"></span>}
-                <span className="truncate text-sm">{t.name}</span>
+                <span className="truncate text-sm">{wbsMap[t.id] ? `${wbsMap[t.id]} ` : ''}{t.name}</span>
               </div>
               <div className="w-24 flex items-center justify-center border-r border-gray-200 min-w-0 px-2 text-center text-xs">
                 {t.start.toISOString().split('T')[0]}
@@ -482,24 +681,32 @@ const GanttChart = ({ projectId, isExpanded = false }: Props) => {
       </div>
 
       {/* Render Inline Popover using fixed positioning to avoid clipping */}
-      {inlineAddParentId && inlinePopoverPos && (
-        <div 
-          style={{ position: 'fixed', top: inlinePopoverPos.top, left: inlinePopoverPos.left, zIndex: 10000 }}
-        >
-          <InlineAddPopover 
-            parentId={inlineAddParentId}
-            onClose={() => {
-              setInlineAddParentId(null);
-              setInlinePopoverPos(null);
-            }}
-            onSave={(parentId, data) => {
-              handleInlineSave(parentId, data);
-              setInlinePopoverPos(null);
-            }}
-            isAdding={isAdding}
-          />
-        </div>
-      )}
+      {inlineAddParentId && inlinePopoverPos && (() => {
+        const inlineParentTask = tasks.find(t => t.id === inlineAddParentId);
+        const inlineParentName = inlineParentTask?.name || '';
+        const inlineWbsNode = inlineParentName ? findWbsNode(inlineParentName, wbsData) : { children: wbsData };
+        const inlineOptions = (inlineWbsNode?.children || []).map((c: any) => c.name);
+
+        return (
+          <div 
+            style={{ position: 'fixed', top: inlinePopoverPos.top, left: inlinePopoverPos.left, zIndex: 10000 }}
+          >
+            <InlineAddPopover 
+              parentId={inlineAddParentId}
+              onClose={() => {
+                setInlineAddParentId(null);
+                setInlinePopoverPos(null);
+              }}
+              onSave={(parentId, data) => {
+                handleInlineSave(parentId, data);
+                setInlinePopoverPos(null);
+              }}
+              isAdding={isAdding}
+              suggestedOptions={inlineOptions}
+            />
+          </div>
+        );
+      })()}
 
       {/* Task Manager Modal */}
       {isModalOpen && (
@@ -547,7 +754,7 @@ const GanttChart = ({ projectId, isExpanded = false }: Props) => {
                            <span className="text-gray-500 text-xs w-4 flex justify-center">
                              {t.type === 'project' ? '📁' : (indent > 0 ? '└─' : '📄')}
                            </span>
-                           <span>{t.name}</span>
+                           <span>{wbsMap[t.id] ? `${wbsMap[t.id]} ` : ''}{t.name}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-gray-400">{t.start.toISOString().split('T')[0]}</td>
@@ -558,6 +765,20 @@ const GanttChart = ({ projectId, isExpanded = false }: Props) => {
                           : '-'}
                       </td>
                       <td className="px-4 py-3 text-right">
+                        <button 
+                          onClick={() => moveTask(t, 'up')}
+                          className="text-gray-400 hover:text-white mr-2"
+                          title="Move Up"
+                        >
+                          ↑
+                        </button>
+                        <button 
+                          onClick={() => moveTask(t, 'down')}
+                          className="text-gray-400 hover:text-white mr-4"
+                          title="Move Down"
+                        >
+                          ↓
+                        </button>
                         <button 
                           onClick={() => openEditModal(t)}
                           className="text-blue-400 hover:text-blue-300 font-semibold"
@@ -580,13 +801,21 @@ const GanttChart = ({ projectId, isExpanded = false }: Props) => {
               <form onSubmit={handleSaveTask} className="grid grid-cols-2 gap-4">
                  <div className="col-span-2 sm:col-span-1">
                    <label className="block text-sm text-gray-400 mb-1">Task Name</label>
-                   <input 
-                     type="text" 
-                     className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
-                     value={newTaskName}
-                     onChange={(e) => setNewTaskName(e.target.value)}
-                     required
-                   />
+                   {(() => {
+                     const parentTask = tasks.find(t => t.id === newTaskParent);
+                     const parentName = parentTask?.name || '';
+                     const wbsNode = parentName ? findWbsNode(parentName, wbsData) : { children: wbsData };
+                     const modalOptions = (wbsNode?.children || []).map((c: any) => c.name);
+                     
+                     return (
+                       <TaskNameCombobox
+                         value={newTaskName}
+                         onChange={setNewTaskName}
+                         options={modalOptions}
+                         theme="dark"
+                       />
+                     );
+                   })()}
                  </div>
                  
                  <div className="col-span-2 sm:col-span-1 row-span-4 flex flex-col">
@@ -621,7 +850,7 @@ const GanttChart = ({ projectId, isExpanded = false }: Props) => {
                          current = parent;
                        }
                        const prefix = "— ".repeat(indent);
-                       return <option key={t.id} value={t.id}>{prefix}{t.name}</option>;
+                       return <option key={t.id} value={t.id}>{prefix}{wbsMap[t.id] ? `${wbsMap[t.id]} ` : ''}{t.name}</option>;
                      })}
                    </select>
                  </div>
@@ -632,6 +861,7 @@ const GanttChart = ({ projectId, isExpanded = false }: Props) => {
                      type="date" 
                      className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500 [color-scheme:dark]"
                      value={newTaskStart}
+                     min={minStartDate}
                      onChange={(e) => setNewTaskStart(e.target.value)}
                      required
                    />
@@ -643,6 +873,7 @@ const GanttChart = ({ projectId, isExpanded = false }: Props) => {
                      type="date" 
                      className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500 [color-scheme:dark]"
                      value={newTaskEnd}
+                     min={newTaskStart || minStartDate}
                      onChange={(e) => setNewTaskEnd(e.target.value)}
                      required
                    />

@@ -1,0 +1,1243 @@
+[
+  {
+    "id": "1",
+    "name": "PEKERJAAN PERSIAPAN",
+    "children": [
+      {
+        "id": "1.1",
+        "name": "Mobilisasi",
+        "children": [
+          {
+            "id": "Mobilisasi tenaga kerja",
+            "name": "Mobilisasi tenaga kerja",
+            "children": []
+          },
+          {
+            "id": "Mobilisasi alat",
+            "name": "Mobilisasi alat",
+            "children": []
+          },
+          {
+            "id": "Mobilisasi material awal",
+            "name": "Mobilisasi material awal",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.2",
+        "name": "Fasilitas Proyek",
+        "children": [
+          {
+            "id": "Direksi keet",
+            "name": "Direksi keet",
+            "children": []
+          },
+          {
+            "id": "Gudang material",
+            "name": "Gudang material",
+            "children": []
+          },
+          {
+            "id": "Pos security",
+            "name": "Pos security",
+            "children": []
+          },
+          {
+            "id": "Toilet pekerja",
+            "name": "Toilet pekerja",
+            "children": []
+          },
+          {
+            "id": "Barak pekerja",
+            "name": "Barak pekerja",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.3",
+        "name": "Pengamanan Area",
+        "children": [
+          {
+            "id": "Pagar proyek",
+            "name": "Pagar proyek",
+            "children": []
+          },
+          {
+            "id": "Gate proyek",
+            "name": "Gate proyek",
+            "children": []
+          },
+          {
+            "id": "Papan nama proyek",
+            "name": "Papan nama proyek",
+            "children": []
+          },
+          {
+            "id": "Safety sign",
+            "name": "Safety sign",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.4",
+        "name": "Pengukuran",
+        "children": [
+          {
+            "id": "Bouwplank",
+            "name": "Bouwplank",
+            "children": []
+          },
+          {
+            "id": "Benchmark",
+            "name": "Benchmark",
+            "children": []
+          },
+          {
+            "id": "Setting out",
+            "name": "Setting out",
+            "children": []
+          },
+          {
+            "id": "Gridline marking",
+            "name": "Gridline marking",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1.5",
+        "name": "Utilitas Sementara",
+        "children": [
+          {
+            "id": "Listrik sementara",
+            "name": "Listrik sementara",
+            "children": []
+          },
+          {
+            "id": "Air sementara",
+            "name": "Air sementara",
+            "children": []
+          },
+          {
+            "id": "Drainase sementara",
+            "name": "Drainase sementara",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "name": "PEKERJAAN TANAH",
+    "children": [
+      {
+        "id": "2.1",
+        "name": "Pembersihan Lahan",
+        "children": [
+          {
+            "id": "Land clearing",
+            "name": "Land clearing",
+            "children": []
+          },
+          {
+            "id": "Pembongkaran",
+            "name": "Pembongkaran",
+            "children": []
+          },
+          {
+            "id": "Disposal",
+            "name": "Disposal",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "2.2",
+        "name": "Galian",
+        "children": [
+          {
+            "id": "Galian pondasi",
+            "name": "Galian pondasi",
+            "children": []
+          },
+          {
+            "id": "Galian basement",
+            "name": "Galian basement",
+            "children": []
+          },
+          {
+            "id": "Galian utilitas",
+            "name": "Galian utilitas",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "2.3",
+        "name": "Timbunan",
+        "children": [
+          {
+            "id": "Urugan pasir",
+            "name": "Urugan pasir",
+            "children": []
+          },
+          {
+            "id": "Urugan pilihan",
+            "name": "Urugan pilihan",
+            "children": []
+          },
+          {
+            "id": "Urugan kembali",
+            "name": "Urugan kembali",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "2.4",
+        "name": "Pemadatan",
+        "children": [
+          {
+            "id": "Compaction subgrade",
+            "name": "Compaction subgrade",
+            "children": []
+          },
+          {
+            "id": "Density test",
+            "name": "Density test",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "2.5",
+        "name": "Dewatering",
+        "children": [
+          {
+            "id": "Sump pit",
+            "name": "Sump pit",
+            "children": []
+          },
+          {
+            "id": "Dewatering pump",
+            "name": "Dewatering pump",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "name": "PEKERJAAN PONDASI",
+    "children": [
+      {
+        "id": "3.1",
+        "name": "Pondasi Tiang",
+        "children": [
+          {
+            "id": "3.1.1",
+            "name": "Pancang",
+            "children": [
+              {
+                "id": "Marking titik",
+                "name": "Marking titik",
+                "children": []
+              },
+              {
+                "id": "Driving pile",
+                "name": "Driving pile",
+                "children": []
+              },
+              {
+                "id": "Welding sambungan",
+                "name": "Welding sambungan",
+                "children": []
+              },
+              {
+                "id": "Final set",
+                "name": "Final set",
+                "children": []
+              },
+              {
+                "id": "Cut off pile",
+                "name": "Cut off pile",
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "3.1.2",
+            "name": "Bored Pile",
+            "children": [
+              {
+                "id": "Drilling",
+                "name": "Drilling",
+                "children": []
+              },
+              {
+                "id": "Slurry",
+                "name": "Slurry",
+                "children": []
+              },
+              {
+                "id": "Cage reinforcement",
+                "name": "Cage reinforcement",
+                "children": []
+              },
+              {
+                "id": "Tremie concrete",
+                "name": "Tremie concrete",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "3.2",
+        "name": "Pile Cap",
+        "children": [
+          {
+            "id": "Lantai kerja",
+            "name": "Lantai kerja",
+            "children": []
+          },
+          {
+            "id": "Bekisting",
+            "name": "Bekisting",
+            "children": []
+          },
+          {
+            "id": "Pembesian",
+            "name": "Pembesian",
+            "children": []
+          },
+          {
+            "id": "Pengecoran",
+            "name": "Pengecoran",
+            "children": []
+          },
+          {
+            "id": "Curing",
+            "name": "Curing",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "3.3",
+        "name": "Tie Beam / Sloof",
+        "children": [
+          {
+            "id": "Bekisting",
+            "name": "Bekisting",
+            "children": []
+          },
+          {
+            "id": "Pembesian",
+            "name": "Pembesian",
+            "children": []
+          },
+          {
+            "id": "Pengecoran",
+            "name": "Pengecoran",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "name": "PEKERJAAN STRUKTUR",
+    "children": [
+      {
+        "id": "4.1",
+        "name": "Struktur Beton",
+        "children": [
+          {
+            "id": "4.1.1",
+            "name": "Kolom",
+            "children": [
+              {
+                "id": "Fabrikasi besi",
+                "name": "Fabrikasi besi",
+                "children": []
+              },
+              {
+                "id": "Pasang tulangan",
+                "name": "Pasang tulangan",
+                "children": []
+              },
+              {
+                "id": "Pasang bekisting",
+                "name": "Pasang bekisting",
+                "children": []
+              },
+              {
+                "id": "Verticality check",
+                "name": "Verticality check",
+                "children": []
+              },
+              {
+                "id": "Pengecoran",
+                "name": "Pengecoran",
+                "children": []
+              },
+              {
+                "id": "Curing",
+                "name": "Curing",
+                "children": []
+              },
+              {
+                "id": "Bongkar bekisting",
+                "name": "Bongkar bekisting",
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "4.1.2",
+            "name": "Balok",
+            "children": [
+              {
+                "id": "Pembesian",
+                "name": "Pembesian",
+                "children": []
+              },
+              {
+                "id": "Bekisting",
+                "name": "Bekisting",
+                "children": []
+              },
+              {
+                "id": "Pengecoran",
+                "name": "Pengecoran",
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "4.1.3",
+            "name": "Plat Lantai",
+            "children": [
+              {
+                "id": "Perancah",
+                "name": "Perancah",
+                "children": []
+              },
+              {
+                "id": "Bekisting",
+                "name": "Bekisting",
+                "children": []
+              },
+              {
+                "id": "Wiremesh / tulangan",
+                "name": "Wiremesh / tulangan",
+                "children": []
+              },
+              {
+                "id": "Embedded conduit",
+                "name": "Embedded conduit",
+                "children": []
+              },
+              {
+                "id": "Pengecoran",
+                "name": "Pengecoran",
+                "children": []
+              },
+              {
+                "id": "Finishing",
+                "name": "Finishing",
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "4.1.4",
+            "name": "Tangga",
+            "children": [
+              {
+                "id": "Bekisting",
+                "name": "Bekisting",
+                "children": []
+              },
+              {
+                "id": "Pembesian",
+                "name": "Pembesian",
+                "children": []
+              },
+              {
+                "id": "Pengecoran",
+                "name": "Pengecoran",
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "4.1.5",
+            "name": "Shear Wall",
+            "children": [
+              {
+                "id": "Rebar",
+                "name": "Rebar",
+                "children": []
+              },
+              {
+                "id": "Formwork",
+                "name": "Formwork",
+                "children": []
+              },
+              {
+                "id": "Concrete casting",
+                "name": "Concrete casting",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "4.2",
+        "name": "Struktur Baja (Jika Ada)",
+        "children": [
+          {
+            "id": "4.2.1",
+            "name": "Fabrikasi",
+            "children": [
+              {
+                "id": "Cutting",
+                "name": "Cutting",
+                "children": []
+              },
+              {
+                "id": "Drilling",
+                "name": "Drilling",
+                "children": []
+              },
+              {
+                "id": "Welding",
+                "name": "Welding",
+                "children": []
+              },
+              {
+                "id": "Painting",
+                "name": "Painting",
+                "children": []
+              }
+            ]
+          },
+          {
+            "id": "4.2.2",
+            "name": "Erection",
+            "children": [
+              {
+                "id": "Lifting",
+                "name": "Lifting",
+                "children": []
+              },
+              {
+                "id": "Alignment",
+                "name": "Alignment",
+                "children": []
+              },
+              {
+                "id": "Bolt tightening",
+                "name": "Bolt tightening",
+                "children": []
+              },
+              {
+                "id": "Grouting",
+                "name": "Grouting",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "5",
+    "name": "PEKERJAAN DINDING",
+    "children": [
+      {
+        "id": "5.1",
+        "name": "Pasangan Bata",
+        "children": [
+          {
+            "id": "Bata merah",
+            "name": "Bata merah",
+            "children": []
+          },
+          {
+            "id": "Bata ringan",
+            "name": "Bata ringan",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "5.2",
+        "name": "Plesteran",
+        "children": []
+      },
+      {
+        "id": "5.3",
+        "name": "Acian",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "6",
+    "name": "PEKERJAAN LANTAI",
+    "children": [
+      {
+        "id": "6.1",
+        "name": "Screed",
+        "children": []
+      },
+      {
+        "id": "6.2",
+        "name": "Keramik",
+        "children": []
+      },
+      {
+        "id": "6.3",
+        "name": "Granite Tile",
+        "children": []
+      },
+      {
+        "id": "6.4",
+        "name": "Homogeneous Tile",
+        "children": []
+      },
+      {
+        "id": "6.5",
+        "name": "Vinyl",
+        "children": []
+      },
+      {
+        "id": "6.6",
+        "name": "Epoxy",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "7",
+    "name": "PEKERJAAN PLAFON",
+    "children": [
+      {
+        "id": "7.1",
+        "name": "Rangka Hollow",
+        "children": []
+      },
+      {
+        "id": "7.2",
+        "name": "Gypsum Board",
+        "children": []
+      },
+      {
+        "id": "7.3",
+        "name": "Metal Ceiling",
+        "children": []
+      },
+      {
+        "id": "7.4",
+        "name": "Finishing Ceiling",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "8",
+    "name": "PEKERJAAN PINTU & JENDELA",
+    "children": [
+      {
+        "id": "8.1",
+        "name": "Kusen",
+        "children": [
+          {
+            "id": "Aluminium",
+            "name": "Aluminium",
+            "children": []
+          },
+          {
+            "id": "Kayu",
+            "name": "Kayu",
+            "children": []
+          },
+          {
+            "id": "UPVC",
+            "name": "UPVC",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "8.2",
+        "name": "Daun Pintu",
+        "children": []
+      },
+      {
+        "id": "8.3",
+        "name": "Kaca",
+        "children": []
+      },
+      {
+        "id": "8.4",
+        "name": "Hardware",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "9",
+    "name": "PEKERJAAN ATAP",
+    "children": [
+      {
+        "id": "9.1",
+        "name": "Struktur Atap",
+        "children": [
+          {
+            "id": "Baja ringan",
+            "name": "Baja ringan",
+            "children": []
+          },
+          {
+            "id": "Baja profil",
+            "name": "Baja profil",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "9.2",
+        "name": "Penutup Atap",
+        "children": [
+          {
+            "id": "Metal roof",
+            "name": "Metal roof",
+            "children": []
+          },
+          {
+            "id": "Genteng",
+            "name": "Genteng",
+            "children": []
+          },
+          {
+            "id": "Membrane",
+            "name": "Membrane",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "9.3",
+        "name": "Talang",
+        "children": []
+      },
+      {
+        "id": "9.4",
+        "name": "Flashing",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "10",
+    "name": "PEKERJAAN FINISHING",
+    "children": [
+      {
+        "id": "10.1",
+        "name": "Cat",
+        "children": [
+          {
+            "id": "Cat interior",
+            "name": "Cat interior",
+            "children": []
+          },
+          {
+            "id": "Cat exterior",
+            "name": "Cat exterior",
+            "children": []
+          },
+          {
+            "id": "Primer",
+            "name": "Primer",
+            "children": []
+          },
+          {
+            "id": "Finish coat",
+            "name": "Finish coat",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "10.2",
+        "name": "Coating",
+        "children": []
+      },
+      {
+        "id": "10.3",
+        "name": "Sealant",
+        "children": []
+      },
+      {
+        "id": "10.4",
+        "name": "Waterproofing",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "11",
+    "name": "PEKERJAAN SANITAIR",
+    "children": [
+      {
+        "id": "11.1",
+        "name": "Closet",
+        "children": []
+      },
+      {
+        "id": "11.2",
+        "name": "Urinoir",
+        "children": []
+      },
+      {
+        "id": "11.3",
+        "name": "Wastafel",
+        "children": []
+      },
+      {
+        "id": "11.4",
+        "name": "Faucet",
+        "children": []
+      },
+      {
+        "id": "11.5",
+        "name": "Floor Drain",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "12",
+    "name": "PEKERJAAN PLUMBING",
+    "children": [
+      {
+        "id": "12.1",
+        "name": "Air Bersih",
+        "children": [
+          {
+            "id": "Pipa",
+            "name": "Pipa",
+            "children": []
+          },
+          {
+            "id": "Valve",
+            "name": "Valve",
+            "children": []
+          },
+          {
+            "id": "Pompa",
+            "name": "Pompa",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "12.2",
+        "name": "Air Kotor",
+        "children": [
+          {
+            "id": "Sewer pipe",
+            "name": "Sewer pipe",
+            "children": []
+          },
+          {
+            "id": "Vent pipe",
+            "name": "Vent pipe",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "12.3",
+        "name": "Air Hujan",
+        "children": [
+          {
+            "id": "Roof drain",
+            "name": "Roof drain",
+            "children": []
+          },
+          {
+            "id": "Downpipe",
+            "name": "Downpipe",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "12.4",
+        "name": "STP / Septic Tank",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "13",
+    "name": "PEKERJAAN HVAC",
+    "children": [
+      {
+        "id": "13.1",
+        "name": "AC Split",
+        "children": []
+      },
+      {
+        "id": "13.2",
+        "name": "Ducting",
+        "children": []
+      },
+      {
+        "id": "13.3",
+        "name": "AHU",
+        "children": []
+      },
+      {
+        "id": "13.4",
+        "name": "FCU",
+        "children": []
+      },
+      {
+        "id": "13.5",
+        "name": "Exhaust Fan",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "14",
+    "name": "PEKERJAAN FIRE FIGHTING",
+    "children": [
+      {
+        "id": "14.1",
+        "name": "Hydrant",
+        "children": []
+      },
+      {
+        "id": "14.2",
+        "name": "Sprinkler",
+        "children": []
+      },
+      {
+        "id": "14.3",
+        "name": "Fire Pump",
+        "children": []
+      },
+      {
+        "id": "14.4",
+        "name": "Fire Extinguisher",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "15",
+    "name": "PEKERJAAN LISTRIK",
+    "children": [
+      {
+        "id": "15.1",
+        "name": "Kabel Tray",
+        "children": []
+      },
+      {
+        "id": "15.2",
+        "name": "Conduit",
+        "children": []
+      },
+      {
+        "id": "15.3",
+        "name": "Kabel",
+        "children": []
+      },
+      {
+        "id": "15.4",
+        "name": "Panel",
+        "children": []
+      },
+      {
+        "id": "15.5",
+        "name": "Lampu",
+        "children": []
+      },
+      {
+        "id": "15.6",
+        "name": "Stop Kontak",
+        "children": []
+      },
+      {
+        "id": "15.7",
+        "name": "Grounding",
+        "children": []
+      },
+      {
+        "id": "15.8",
+        "name": "Lightning Protection",
+        "children": []
+      },
+      {
+        "id": "15.9",
+        "name": "Genset",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "16",
+    "name": "PEKERJAAN ELV",
+    "children": [
+      {
+        "id": "16.1",
+        "name": "CCTV",
+        "children": []
+      },
+      {
+        "id": "16.2",
+        "name": "Fire Alarm",
+        "children": []
+      },
+      {
+        "id": "16.3",
+        "name": "Access Control",
+        "children": []
+      },
+      {
+        "id": "16.4",
+        "name": "Data & Telephone",
+        "children": []
+      },
+      {
+        "id": "16.5",
+        "name": "Sound System",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "17",
+    "name": "PEKERJAAN FACADE",
+    "children": [
+      {
+        "id": "17.1",
+        "name": "Curtain Wall",
+        "children": []
+      },
+      {
+        "id": "17.2",
+        "name": "ACP",
+        "children": []
+      },
+      {
+        "id": "17.3",
+        "name": "Cladding",
+        "children": []
+      },
+      {
+        "id": "17.4",
+        "name": "Sun Shading",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "18",
+    "name": "PEKERJAAN INTERIOR",
+    "children": [
+      {
+        "id": "18.1",
+        "name": "Partisi",
+        "children": []
+      },
+      {
+        "id": "18.2",
+        "name": "Wall Panel",
+        "children": []
+      },
+      {
+        "id": "18.3",
+        "name": "Built-in Furniture",
+        "children": []
+      },
+      {
+        "id": "18.4",
+        "name": "Decorative Ceiling",
+        "children": []
+      },
+      {
+        "id": "18.5",
+        "name": "Decorative Lighting",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "19",
+    "name": "PEKERJAAN EKSTERIOR",
+    "children": [
+      {
+        "id": "19.1",
+        "name": "Drainase",
+        "children": []
+      },
+      {
+        "id": "19.2",
+        "name": "Paving Block",
+        "children": []
+      },
+      {
+        "id": "19.3",
+        "name": "Asphalt",
+        "children": []
+      },
+      {
+        "id": "19.4",
+        "name": "Sidewalk",
+        "children": []
+      },
+      {
+        "id": "19.5",
+        "name": "Kanstin",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "20",
+    "name": "PEKERJAAN LANDSCAPE",
+    "children": [
+      {
+        "id": "20.1",
+        "name": "Softscape",
+        "children": [
+          {
+            "id": "Rumput",
+            "name": "Rumput",
+            "children": []
+          },
+          {
+            "id": "Pohon",
+            "name": "Pohon",
+            "children": []
+          },
+          {
+            "id": "Tanaman",
+            "name": "Tanaman",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "20.2",
+        "name": "Hardscape",
+        "children": [
+          {
+            "id": "Taman",
+            "name": "Taman",
+            "children": []
+          },
+          {
+            "id": "Batu hias",
+            "name": "Batu hias",
+            "children": []
+          },
+          {
+            "id": "Bangku taman",
+            "name": "Bangku taman",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "21",
+    "name": "TESTING & COMMISSIONING",
+    "children": [
+      {
+        "id": "21.1",
+        "name": "Testing Mechanical",
+        "children": []
+      },
+      {
+        "id": "21.2",
+        "name": "Testing Electrical",
+        "children": []
+      },
+      {
+        "id": "21.3",
+        "name": "Testing Plumbing",
+        "children": []
+      },
+      {
+        "id": "21.4",
+        "name": "Integrated Test",
+        "children": []
+      },
+      {
+        "id": "21.5",
+        "name": "Balancing",
+        "children": []
+      },
+      {
+        "id": "21.6",
+        "name": "Trial Run",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": "22",
+    "name": "PEKERJAAN SERAH TERIMA",
+    "children": [
+      {
+        "id": "22.1",
+        "name": "Punch List",
+        "children": []
+      },
+      {
+        "id": "22.2",
+        "name": "Perbaikan Defect",
+        "children": []
+      },
+      {
+        "id": "22.3",
+        "name": "As-built Drawing",
+        "children": []
+      },
+      {
+        "id": "22.4",
+        "name": "O&M Manual",
+        "children": []
+      },
+      {
+        "id": "22.5",
+        "name": "PHO",
+        "children": []
+      },
+      {
+        "id": "22.6",
+        "name": "FHO",
+        "children": []
+      }
+    ]
+  }
+]
